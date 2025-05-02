@@ -11,7 +11,7 @@ info:
     Esse atributo armazena as origens permitidas para utilização do protocolo FIDO. 
     Nas chamadas que possuem o argumento clientDataJSON (fido-registration e authorise), o atributo origin deve ser extraído do clientDataJSON e deve ser realizada a verificação se a origin do mesmo está contida no software_origin_uris informado no momento do DCR/DCM. 
     Caso a instituição iniciadora altere ou inclua o valor do atributo software_origin_uris, será necessária realização de um novo processo de DCM com as detentoras
-  version: 2.2.0
+  version: 2.2.0-rc.1
   license:
     name: Apache 2.0
     url: 'https://www.apache.org/licenses/LICENSE-2.0'
@@ -529,7 +529,7 @@ paths:
         - $ref: '#/components/parameters/x-bcb-nfc'
       requestBody:
         required: true
-        description: Payload para criação de vínculo de conta.
+        description: Payload para autorização de consentimento a partir de um vínculo de conta.
         content:
           application/jwt:
             schema:
@@ -579,6 +579,11 @@ components:
     xFapiInteractionIdBadRequest:
         description: |
           Um UUID [RFC4122](https://tools.ietf.org/html/rfc4122) usado como um ID de correlação entre request e response. Campo de geração e envio obrigatório pela iniciadora (client) e o seu valor deve ser "espelhado" pela detentora (server) no cabeçalho de resposta. Caso não seja recebido ou se for recebido um valor inválido, a detentora deve gerar um x-fapi-interaction-id e retorná-lo na resposta com o HTTP status code 400. A iniciadora deve acatar o valor recebido da detentora.
+        schema:
+          $ref: '#/components/schemas/XFapiInteractionId'
+    xFapiInteractionServerError:
+        description: |
+          Um UUID RFC4122 usado como um ID de correlação entre request e response. Campo de geração e envio obrigatório pela iniciadora (client). Seu valor deve obrigatoriamente ser replicado pela detentora (server) no cabeçalho de resposta, exceto em casos de falhas estruturais que impeçam a replicação. Caso não seja possível ser replicado, não deve ser enviado.
         schema:
           $ref: '#/components/schemas/XFapiInteractionId'
   schemas:
@@ -2454,6 +2459,9 @@ components:
         application/json; charset=utf-8:
           schema:
             $ref: '#/components/schemas/ResponseError'
+      headers:
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/xFapiInteractionServerError'
     MethodNotAllowed:
       description: O consumidor tentou acessar o recurso com um método não suportado
       content:
@@ -2487,6 +2495,9 @@ components:
         application/json; charset=utf-8:
           schema:
             $ref: '#/components/schemas/ResponseError'
+      headers:
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/xFapiInteractionServerError'
     UnprocessableEntityConsentsAuthorization:
       description: 'A solicitação foi bem-formada, mas não pôde ser processada devido à lógica de negócios específica da solicitação.'
       content:
