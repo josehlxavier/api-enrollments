@@ -529,7 +529,7 @@ paths:
         - $ref: '#/components/parameters/x-bcb-nfc'
       requestBody:
         required: true
-        description: Payload para criação de vínculo de conta.
+        description: Payload para autorização de consentimento a partir de um vínculo de conta.
         content:
           application/jwt:
             schema:
