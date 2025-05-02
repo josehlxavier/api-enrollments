@@ -11,7 +11,7 @@ info:
     Esse atributo armazena as origens permitidas para utilização do protocolo FIDO. 
     Nas chamadas que possuem o argumento clientDataJSON (fido-registration e authorise), o atributo origin deve ser extraído do clientDataJSON e deve ser realizada a verificação se a origin do mesmo está contida no software_origin_uris informado no momento do DCR/DCM. 
     Caso a instituição iniciadora altere ou inclua o valor do atributo software_origin_uris, será necessária realização de um novo processo de DCM com as detentoras
-  version: 2.1.0
+  version: 2.2.0
   license:
     name: Apache 2.0
     url: 'https://www.apache.org/licenses/LICENSE-2.0'
@@ -1770,6 +1770,8 @@ components:
               description: Timeout, em milissegundos, para registro da credencial FIDO2.
             excludeCredentials:
               type: array
+              description: |  
+                Lista de IDs de credenciais já existentes para este usuário e autenticador. É utilizado para evitar a criação de múltiplas credenciais para o mesmo usuário em mesmo autenticador. Caso seja enviado, a iniciadora pode rejeitar o registro de uma das credenciais já existentes no dispositivo, ou seguir com a criação, substituindo ou não o vínculo já existente.
               items:
                 $ref: '#/components/schemas/FidoPublicKeyCredentialDescriptor'
             authenticatorSelection:
