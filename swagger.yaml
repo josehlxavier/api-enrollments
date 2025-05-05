@@ -1010,7 +1010,7 @@ components:
                   - PARAMETRO_NAO_INFORMADO: Parâmetro não informado.
                   - PARAMETRO_INVALIDO: Parâmetro inválido.
                   - ERRO_IDEMPOTENCIA: Erro idempotência.
-                  - ORIGEM_FIDO_INVALIDA: O valor contido no campo ```fidoAssertion.response.clientDataJSON.origin``` não pode ser verificado
+                  - ORIGEM_FIDO_INVALIDA: O valor contido no campo ```fidoAssertion.response.clientDataJSON.origin``` não pode ser verificado.
               title:
                 type: string
                 maxLength: 255
