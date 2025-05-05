@@ -256,7 +256,7 @@ paths:
       summary: Obter parâmetros para criação de credenciais FIDO2.
       operationId: enrollmentCreateFidoRegistrationOptions
       description: |
-        Método para obter os parâmetros para criação de uma nova credencial FIDO2. Um novo challenge deve ser criado **para cada enrollment, limitando a um challenge por enrollmentId**. Os parâmetros da resposta devem ser compatíveis com a definição W3C [W3C](https://www.w3.org/TR/webauthn-2/#dictionary-makecredentialoptions)
+        Método para obter os parâmetros para criação de uma nova credencial FIDO2. Um novo challenge deve ser criado **para cada enrollment, limitando a um challenge por enrollmentId**. Os parâmetros da resposta devem ser compatíveis com a definição [W3C](https://www.w3.org/TR/webauthn-2/#dictionary-makecredentialoptions)
       parameters:
         - $ref: '#/components/parameters/enrollmentId'
         - $ref: '#/components/parameters/Authorization'
