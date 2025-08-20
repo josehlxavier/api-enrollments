@@ -29,6 +29,8 @@ tags:
     description: Gerenciamento dos dispositivos vinculados as contas
   - name: Consentimento
     description: Autorização de consentimentos criados via fluxo sem redirecionamento.
+  - name: Pix Automático
+    description: Autorização de consentimentos de Pix Automático criados via fluxo sem redirecionamento.
 paths:
   /enrollments:
     post:
@@ -568,6 +570,66 @@ paths:
           - 'enrollment:enrollmentId'
           - payments
           - nrp-consents
+  /recurring-consents/{recurringConsentId}/authorise:
+    post:
+      tags:
+        - Pix Automático
+      summary: Autorização de um consentimento de Pix Automático na jornada sem redirecionamento
+      operationId: authorizeRecurringConsent
+      description: |
+        Autorização de um consentimento de Pix Automático em status AWAITING_AUTHORISATION a partir do access_token emitido pela jornada sem redirecionamento e envio de sinais de risco.
+        Consentimentos de alçadas únicas devem transitar para o status AUTHORISED na execução com sucesso desse método. Para consentimentos com múltiplas alçadas aprovadoras, o consentimento deverá permanecer em PARTIALLY_ACCEPTED até que todos os aprovadores tenham autorizado. Em caso de falha de negócio (HTTP Status Code 422), o consentimento de pagamento deve transitar para o status REJECTED e seguir os motivos de rejeição presentes na API de pagamentos Automáticos.  
+        Caso a detentora identifique que a conta de débito informada pelo iniciador na criação do consentimento diverge da conta de débito vinculada ao dispositivo, o detentor deve retornar neste método o erro HTTP 422 com código CONTA_DEBITO_DIVERGENTE_CONSENTIMENTO_VINCULO e rejeitar o consentimento com o motivo CONTA_NAO_PERMITE_PAGAMENTO.  
+        Se o iniciador, durante a criação do consentimento, omitir a conta de débito, o detentor deve considerar a conta de débito associada ao vínculo autorizado para o preenchimento do objeto /data/debtorAccount, presente no consentimento.  
+        Os limites relacionados ao vínculo não devem ser validados durante o processo de autorização deste consentimento nem durante o ciclo de vida.
+      parameters:
+        - $ref: '#/components/parameters/recurringConsentId'
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/xFapiAuthDate'
+        - $ref: '#/components/parameters/xFapiCustomerIpAddress'
+        - $ref: '#/components/parameters/xFapiInteractionId'
+        - $ref: '#/components/parameters/xCustomerUserAgent'
+        - $ref: '#/components/parameters/XIdempotencyKey'
+      requestBody:
+        required: true
+        description: Payload para autorização de consentimento a partir de um vínculo de conta.
+        content:
+          application/jwt:
+            schema:
+              $ref: '#/components/schemas/ConsentAuthorization'
+      responses:
+        '204':
+          $ref: '#/components/responses/204PaymentsConsentsAuthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntityRecurringConsentsAuthorization'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '529':
+          $ref: '#/components/responses/SiteIsOverloaded'
+        default:
+          description: Erro inesperado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+      security:
+        - OAuth2AuthorizationCode:
+          - openid
+          - 'enrollment:enrollmentId'
+          - recurring-payments
+          - nrp-consents
 components:
   headers:
     xFapiInteractionId:
@@ -1048,6 +1110,79 @@ components:
                   - PARAMETRO_INVALIDO: Parâmetro [nome_campo] não obedece as regras de formatação esperadas.
                   - ERRO_IDEMPOTENCIA: Conteúdo da mensagem (claim data) diverge do conteúdo associado a esta chave de idempotência (x-idempotency-key).
                   - ORIGEM_FIDO_INVALIDA: O valor contido no campo ```fidoAssertion.response.clientDataJSON.origin``` não pode ser verificado.
+        meta:
+          $ref: '#/components/schemas/Meta'
+    422ResponseRecurringConsentsAuthorization:
+      type: object
+      required:
+        - errors
+        - meta
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - code
+              - title
+              - detail
+            properties:
+              code:
+                type: string
+                enum:
+                  - STATUS_VINCULO_INVALIDO
+                  - STATUS_CONSENTIMENTO_INVALIDO
+                  - RISCO
+                  - FALTAM_SINAIS_OBRIGATORIOS_DA_PLATAFORMA
+                  - CONTA_DEBITO_DIVERGENTE_CONSENTIMENTO_VINCULO
+                  - PARAMETRO_NAO_INFORMADO
+                  - PARAMETRO_INVALIDO
+                  - ERRO_IDEMPOTENCIA
+                example: STATUS_VINCULO_INVALIDO
+                description: |
+                  Códigos de erros previstos:
+
+                  - STATUS_VINCULO_INVALIDO: O vínculo de conta não possui status AUTHORISED.
+                  - STATUS_CONSENTIMENTO_INVALIDO: O consentimento de pagamentos não possui status AWAITING_AUTHORISATION.
+                  - RISCO: Validação síncrona dos sinais de risco impediram a ativação do consentimento.                  
+                  - FALTAM_SINAIS_OBRIGATORIOS_DA_PLATAFORMA: Os sinais obrigatórios para a plataforma do usuário não foram enviados em sua totalidade.
+                  - CONTA_DEBITO_DIVERGENTE_CONSENTIMENTO_VINCULO: A conta de débito informada pelo iniciador não condiz com a conta de débito vinculada ao dispositivo.
+                  - PARAMETRO_NAO_INFORMADO: Parâmetro não informado.
+                  - PARAMETRO_INVALIDO: Parâmetro inválido.
+                  - ERRO_IDEMPOTENCIA: Erro idempotência.
+              title:
+                type: string
+                maxLength: 255
+                pattern: '[\w\W\s]*'
+                example: Permissões inválidas
+                description: |
+                  Título específico do erro reportado, de acordo com o código enviado:
+
+                  - STATUS_VINCULO_INVALIDO: Status do vínculo de conta inválido.
+                  - STATUS_CONSENTIMENTO_INVALIDO: Status do consentimento inválido.
+                  - RISCO: Validação síncrona dos sinais de risco impediram a ativação do consentimento.
+                  - FALTAM_SINAIS_OBRIGATORIOS_DA_PLATAFORMA: Falta de sinais obrigatórios para a plataforma do usuário.
+                  - CONTA_DEBITO_DIVERGENTE_CONSENTIMENTO_VINCULO: A conta de débito informada pelo iniciador não condiz com a conta de débito vinculada ao dispositivo.
+                  - PARAMETRO_NAO_INFORMADO: Parâmetro não informado.
+                  - PARAMETRO_INVALIDO: Parâmetro inválido.
+                  - ERRO_IDEMPOTENCIA: Erro idempotência.
+              detail:
+                type: string
+                maxLength: 2048
+                pattern: '[\w\W\s]*'
+                example: 'Permissões inválidas'
+                description: |
+                  Descrição específica do erro de acordo com o código reportado:
+
+                  - STATUS_VINCULO_INVALIDO: O vínculo de conta não possui status AUTHORISED.
+                  - STATUS_CONSENTIMENTO_INVALIDO: O consentimento de pagamentos não possui status AWAITING_AUTHORISATION.
+                  - RISCO: Validação síncrona dos sinais de risco impediram a ativação do consentimento.
+                  - FALTAM_SINAIS_OBRIGATORIOS_DA_PLATAFORMA: Os sinais obrigatórios para a plataforma do usuário não foram enviados em sua totalidade.
+                  - CONTA_DEBITO_DIVERGENTE_CONSENTIMENTO_VINCULO: A conta de débito informada pelo iniciador não condiz com a conta de débito vinculada ao dispositivo.
+                  - PARAMETRO_NAO_INFORMADO: Parâmetro [nome_campo] obrigatório não informado.
+                  - PARAMETRO_INVALIDO: Parâmetro [nome_campo] não obedece as regras de formatação esperadas.
+                  - ERRO_IDEMPOTENCIA: Conteúdo da mensagem (claim data) diverge do conteúdo associado a esta chave de idempotência (x-idempotency-key).
         meta:
           $ref: '#/components/schemas/Meta'
     BusinessEntity:
@@ -2325,6 +2460,24 @@ components:
         type: string
         pattern: '^urn:[a-zA-Z0-9][a-zA-Z0-9\-]{0,31}:[a-zA-Z0-9()+,\-.:=@;$_!*''%\/?#]+$'
         maxLength: 256
+    recurringConsentId:
+      name: recurringConsentId
+      in: path
+      description: |
+        O `recurringConsentId` é o identificador único do consentimento de longa duração e deverá ser um URN - Uniform Resource Name.  
+        Um URN, conforme definido na [RFC8141](https://tools.ietf.org/html/rfc8141) é um Uniform Resource 
+        Identifier - URI - que é atribuído sob o URI scheme "urn" e um namespace URN específico, com a intenção de que o URN 
+        seja um identificador de recurso persistente e independe da localização.  
+        Considerando a string urn:bancoex:C1DD33123 como exemplo para `recurringConsentId` temos:
+        - o namespace(urn)
+        - o identificador associado ao namespace da instituição detentora (bancoex).
+        - o identificador específico dentro do namespace (C1DD33123).  
+        Informações mais detalhadas sobre a construção de namespaces devem ser consultadas na [RFC8141](https://tools.ietf.org/html/rfc8141).
+      required: true
+      schema:
+        type: string
+        pattern: '^urn:[a-zA-Z0-9][a-zA-Z0-9\-]{0,31}:[a-zA-Z0-9()+,\-.:=@;$_!*''%\/?#]+$'
+        maxLength: 256
     enrollmentId:
       name: enrollmentId
       in: path
@@ -2431,6 +2584,7 @@ components:
           tokenUrl: 'https://authserver.example/token'
           scopes:
             payments: Escopo necessário para acesso à API Payment Initiation.
+            recurring-payments: Escopo necessário para acesso à API Automatic Payments.
             openid: Indica que a autorização está sendo realizada utilizando o protocolo definido pela openid.
             'enrollment:enrollmentId': Permite realizar atualização de um registro com a permissão do cliente.      
             nrp-consents: Consentimento para pagamentos sem redirecionamento.
@@ -2515,6 +2669,15 @@ components:
         application/jwt:
           schema:
             $ref: '#/components/schemas/422ResponseConsentsAuthorization'
+      headers:
+        x-fapi-interaction-id:
+          $ref: '#/components/headers/xFapiInteractionId'
+    UnprocessableEntityRecurringConsentsAuthorization:
+      description: 'A solicitação foi bem-formada, mas não pôde ser processada devido à lógica de negócios específica da solicitação.'
+      content:
+        application/jwt:
+          schema:
+            $ref: '#/components/schemas/422ResponseRecurringConsentsAuthorization'
       headers:
         x-fapi-interaction-id:
           $ref: '#/components/headers/xFapiInteractionId'
