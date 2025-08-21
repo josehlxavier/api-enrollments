@@ -1074,6 +1074,27 @@ components:
               description: Tipo do documento de identificação oficial do titular pessoa jurídica.
               example: CNPJ
               pattern: '^[A-Z]{4}$'
+    EnrollmentJourney:
+      type: object
+      required:
+        - isLinked
+        - linkId
+      description: | 
+        Informações adicionais sobre o contexto de Jornada Otimizada.  
+        [RESTRIÇÃO] Objeto de envio obrigatório quando o usuário manifestar consentimento para compartilhamento de saldo através da Jornada Otimizada, independente do status do consentimento de dados”
+      properties:
+        isLinked:
+          type: boolean
+          example: false
+          description: |
+            Campo para identificação de consentimento iniciado em Jornada Otimizada.
+        linkId:
+          type: string
+          pattern: ^urn:[a-zA-Z0-9][a-zA-Z0-9-]{0,31}:[a-zA-Z0-9()+,\-.:=@;$_!*'%\/?#]+$
+          maxLength: 256
+          example: urn:bancoex:C1DD331237
+          description: |
+            Identificador do consentimento de dados ao qual este consentimento está vinculado.
     CreateEnrollment:
       type: object
       required:
@@ -1097,6 +1118,8 @@ components:
               $ref: '#/components/schemas/BusinessEntity'
             debtorAccount:
               $ref: '#/components/schemas/DebtorAccount'
+            journey:
+              $ref: '#/components/schemas/EnrollmentJourney'
             enrollmentName:
               description: |
                 [Restrição] Deve ser preenchido sempre que o usuário pagador inserir alguma informação no nome do vínculo/dispositivo tanto no iniciador como no detentor de conta
@@ -2127,6 +2150,8 @@ components:
               $ref: '#/components/schemas/BusinessEntity'
             debtorAccount:
               $ref: '#/components/schemas/DebtorAccount'
+            journey:
+              $ref: '#/components/schemas/EnrollmentJourney'
             enrollmentName:
               description: |
                 [Restrição] Deve ser preenchido sempre que o usuário pagador inserir alguma informação no nome do vínculo/dispositivo tanto no iniciador como no detentor de conta
@@ -2204,6 +2229,8 @@ components:
                     As informações quanto à conta de origem do pagador poderão ser trazidas no vínculo para a detentora, caso a iniciadora tenha coletado essas informações do cliente. Do contrário, será coletada na detentora e trazida para a iniciadora como resposta à criação do vínculo. 
                     
                     [ Restrição ] Deve obrigatoriamente ser preenchido nos status AWAITING_ENROLLMENT, AUTHORISED e REVOKED e não deve ser alterado.
+            journey:
+              $ref: '#/components/schemas/EnrollmentJourney'
             cancellation:
               type: object
               required:
