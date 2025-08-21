@@ -11,7 +11,7 @@ info:
     Esse atributo armazena as origens permitidas para utilização do protocolo FIDO. 
     Nas chamadas que possuem o argumento clientDataJSON (fido-registration e authorise), o atributo origin deve ser extraído do clientDataJSON e deve ser realizada a verificação se a origin do mesmo está contida no software_origin_uris informado no momento do DCR/DCM. 
     Caso a instituição iniciadora altere ou inclua o valor do atributo software_origin_uris, será necessária realização de um novo processo de DCM com as detentoras
-  version: 2.2.0-rc.1
+  version: 2.2.0-rc.2
   license:
     name: Apache 2.0
     url: 'https://www.apache.org/licenses/LICENSE-2.0'
@@ -455,7 +455,9 @@ paths:
       summary: Envio de sinais de risco para iniciação do vínculo de dispositivo
       operationId: riskSignals
       description: |
-        Envio de sinais de risco para iniciação do vínculo de dispositivo, o status do enrollment deve estar em `AWAITING_RISK_SIGNALS`. Após recebimento com sucesso dos sinais, o status do enrollment deve transitar para `AWAITING_ACCOUNT_HOLDER_VALIDATION`.
+        Envio de sinais de risco para iniciação do vínculo de dispositivo, o status do enrollment deve estar em ```AWAITING_RISK_SIGNALS```. Após recebimento com sucesso dos sinais, o status do enrollment deve transitar para ```AWAITING_ACCOUNT_HOLDER_VALIDATION```.  
+        Em casos de falha nesse método (HTTP Status 422), o vínculo deve transitar para ```REJECTED``` sincronamente.  
+        Em caso de sucesso no recebimento, a instituição detentora, a seu critério e após análise das informações fornecidas, pode rejeitar esse vínculo por validações internas de segurança.
       parameters:
         - $ref: '#/components/parameters/enrollmentId'
         - $ref: '#/components/parameters/Authorization'
