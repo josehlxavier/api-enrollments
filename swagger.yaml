@@ -11,7 +11,7 @@ info:
     Esse atributo armazena as origens permitidas para utilização do protocolo FIDO. 
     Nas chamadas que possuem o argumento clientDataJSON (fido-registration e authorise), o atributo origin deve ser extraído do clientDataJSON e deve ser realizada a verificação se a origin do mesmo está contida no software_origin_uris informado no momento do DCR/DCM. 
     Caso a instituição iniciadora altere ou inclua o valor do atributo software_origin_uris, será necessária realização de um novo processo de DCM com as detentoras
-  version: 2.2.0-rc.1
+  version: 2.2.0-rc.2
   license:
     name: Apache 2.0
     url: 'https://www.apache.org/licenses/LICENSE-2.0'
@@ -1863,11 +1863,12 @@ components:
       type: string
       enum:
         - PAYMENTS_INITIATE
+        - RECURRING_PAYMENTS_INITIATE
       example: PAYMENTS_INITIATE
       description: |
-        Permissões atribuídas ao vínculo de conta:
-        
-        • PAYMENTS_INITIATE: Iniciação de pagamentos sem redirecionamento à detentora.
+        Permissões atribuídas ao vínculo de conta:  
+        • PAYMENTS_INITIATE: Permite a utilização do vinculo para iniciação de pagamentos sem redirecionamento nas famílias de API “payments-consents” e “payments-pix”.  
+        • RECURRING_PAYMENTS_INITIATE: Permite a utilização do vinculo para iniciação de Pix Automático sem redirecionamento nas famílias de API "payments-recurring-consents-automatic" e "payments-pix-recurring-payments-automatic".
     EnumEnrollmentCancelledFrom:
       type: string
       enum:
