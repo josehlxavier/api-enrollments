@@ -23,7 +23,7 @@ info:
     O valor mínimo definido pelo recebedor no âmbito do Pix Automático também não é alvo de validação durante a autorização do consentimento através desta API.   
     Por fim, os limites do pagamento das recorrências a ser considerado são os definidos no consentimento de Pix Automático.
   
-  version: 2.2.0-rc.2
+  version: 2.2.0-rc.3
   license:
     name: Apache 2.0
     url: 'https://www.apache.org/licenses/LICENSE-2.0'
