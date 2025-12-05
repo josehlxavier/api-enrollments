@@ -23,7 +23,7 @@ info:
     O valor mínimo definido pelo recebedor no âmbito do Pix Automático também não é alvo de validação durante a autorização do consentimento através desta API.   
     Por fim, os limites do pagamento das recorrências a ser considerado são os definidos no consentimento de Pix Automático.
   
-  version: 2.2.0-rc.3
+  version: 2.2.0
   license:
     name: Apache 2.0
     url: 'https://www.apache.org/licenses/LICENSE-2.0'
@@ -1172,6 +1172,7 @@ components:
                 enum:
                   - STATUS_VINCULO_INVALIDO
                   - STATUS_CONSENTIMENTO_INVALIDO
+                  - ORIGEM_FIDO_INVALIDA
                   - RISCO
                   - FALTAM_SINAIS_OBRIGATORIOS_DA_PLATAFORMA
                   - CONTA_DEBITO_DIVERGENTE_CONSENTIMENTO_VINCULO
@@ -1184,6 +1185,7 @@ components:
 
                   - STATUS_VINCULO_INVALIDO: O vínculo de conta não possui status AUTHORISED.
                   - STATUS_CONSENTIMENTO_INVALIDO: O consentimento de pagamentos não possui status AWAITING_AUTHORISATION.
+                  - ORIGEM_FIDO_INVALIDA: O valor contido no campo ```fidoAssertion.response.clientDataJSON.origin``` não pode ser verificado.
                   - RISCO: Validação síncrona dos sinais de risco impediram a ativação do consentimento.                  
                   - FALTAM_SINAIS_OBRIGATORIOS_DA_PLATAFORMA: Os sinais obrigatórios para a plataforma do usuário não foram enviados em sua totalidade.
                   - CONTA_DEBITO_DIVERGENTE_CONSENTIMENTO_VINCULO: A conta de débito informada pelo iniciador não condiz com a conta de débito vinculada ao dispositivo.
@@ -1200,6 +1202,7 @@ components:
 
                   - STATUS_VINCULO_INVALIDO: Status do vínculo de conta inválido.
                   - STATUS_CONSENTIMENTO_INVALIDO: Status do consentimento inválido.
+                  - ORIGEM_FIDO_INVALIDA: "Origin" não pode ser verificada.
                   - RISCO: Validação síncrona dos sinais de risco impediram a ativação do consentimento.
                   - FALTAM_SINAIS_OBRIGATORIOS_DA_PLATAFORMA: Falta de sinais obrigatórios para a plataforma do usuário.
                   - CONTA_DEBITO_DIVERGENTE_CONSENTIMENTO_VINCULO: A conta de débito informada pelo iniciador não condiz com a conta de débito vinculada ao dispositivo.
@@ -1217,6 +1220,7 @@ components:
                   - STATUS_VINCULO_INVALIDO: O vínculo de conta não possui status AUTHORISED.
                   - STATUS_CONSENTIMENTO_INVALIDO: O consentimento de pagamentos não possui status AWAITING_AUTHORISATION.
                   - RISCO: Validação síncrona dos sinais de risco impediram a ativação do consentimento.
+                  - ORIGEM_FIDO_INVALIDA: O valor contido no campo [response.clientDataJSON.origin](https://www.w3.org/TR/webauthn-2/#dom-authenticatorresponse-clientdatajson) não pode ser verificado.
                   - FALTAM_SINAIS_OBRIGATORIOS_DA_PLATAFORMA: Os sinais obrigatórios para a plataforma do usuário não foram enviados em sua totalidade.
                   - CONTA_DEBITO_DIVERGENTE_CONSENTIMENTO_VINCULO: A conta de débito informada pelo iniciador não condiz com a conta de débito vinculada ao dispositivo.
                   - PARAMETRO_NAO_INFORMADO: Parâmetro [nome_campo] obrigatório não informado.
