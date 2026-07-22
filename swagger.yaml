@@ -23,7 +23,7 @@ info:
     O valor mínimo definido pelo recebedor no âmbito do Pix Automático também não é alvo de validação durante a autorização do consentimento através desta API.   
     Por fim, os limites do pagamento das recorrências a ser considerado são os definidos no consentimento de Pix Automático.
   
-  version: 2.2.0
+  version: 2.3.0
   license:
     name: Apache 2.0
     url: 'https://www.apache.org/licenses/LICENSE-2.0'
@@ -2218,8 +2218,8 @@ components:
         id:
           type: string
           description: |
-            Identificador único do usuário sob registro em formato base64. A conversão deste valor para o formato original (BufferSource ou ArrayBuffer) não deve ultrapassar 64 bytes. 
-            O identificador único deve ser opaco, ou seja, não deve carregar dados pessoais sobre o usuário, por exemplo (não exaustivo) um UUID RFC4122 cumpre com os requisitos desse campo
+            Identificador único do usuário sob registro em formato base64. A conversão deste valor para o formato original (BufferSource ou ArrayBuffer) não deve ultrapassar 64 bytes.
+            O identificador único deve ser criado a partir de um UUID RFC4122 convertido para base64url. É vedada a reutilização do valor em vínculos distintos
         name:
           type: string
           description: Identificador do usuário human-readable.
